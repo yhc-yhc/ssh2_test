@@ -12,14 +12,14 @@ fi
 tar -jxpf ../$tar_name
 
 if [ $? -eq 0 ]; then
-	echo 'translate success'
+	echo open $project_name success
 	rm ../$tar_name
 else
 	echo 'tar -jxpf error'
 fi
 
 cd $project_name
-echo `ls`
-./run.sh test >/dev/null 2>&1
+./fly.sh product 
+# >/dev/null 2>&1
 
 echo server run finished!

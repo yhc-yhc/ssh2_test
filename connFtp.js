@@ -17,17 +17,17 @@ exports.pull_project = async function(git_url, project_box_path, tar_path) {
     return new Promise((resolve, reject) => {
       const ls = cp.spawn('./shell/pull_init_tar.sh', [git_url, project_box_path, project_path, project_name, tar_path, tar_name])
       ls.stdout.on('data', (data) => {
-        console.log(`stdout: ${data}`);
+        console.log(`local stdout :: ${data}`);
       });
 
       ls.stderr.on('data', (data) => {
         // reject(data)
-        console.log(`stderr: ${data}`);
+        console.log(`local stderr: ${data}`);
       });
 
       ls.on('close', (code) => {
+        // console.log(`child process exited with code ${code}`);
         resolve([code, project_name, tar_name])
-        console.log(`child process exited with code ${code}`);
       });
     });
   }
@@ -56,41 +56,22 @@ exports.bathEnsureDir = async function(pathAry) {
   return results;
 }
 
-exports.init = function(ip, port, userName, password) {
+exports.init = async function(server) {
   var conn = new Client();
   conn.connect({
-    host: ip,
-    port: port,
-    username: userName,
-    password: password
+    host: server.host,
+    port: server.port,
+    username: server.username,
+    password: server.password
   });
 
   return new Promise((resolve, reject) => {
     conn.on('ready', function() {
-      console.log('SSH2 :: ready');
+      console.log(server.host, 'SSH2 :: ready');
       resolve(conn)
     })
   });
 }
-
-// exports.key_init = function(ip, port, userName, keyUrl) {
-//   console.log(require('fs').readFileSync(keyUrl));
-//   var conn = new Client();
-//   conn.connect({
-//     host: ip,
-//     port: port,
-//     username: userName,
-//     privateKey: require('fs').readFileSync(keyUrl)
-//   });
-
-//   return new Promise((resolve, reject) => {
-//     conn.on('ready', function() {
-//       console.log('SSH2 :: ready');
-//       resolve(conn)
-//     })
-//   });
-// }
-
 
 exports.ftp = async function(conn) {
   return new Promise((resolve, reject) => {
@@ -99,7 +80,7 @@ exports.ftp = async function(conn) {
         console.log(err)
         reject(err)
       } else {
-        console.log('FTP :: ready')
+        // console.log('FTP :: ready')
         resolve(sftp)
       }
 
@@ -145,15 +126,16 @@ exports.exec = function(conn, shellUrl) {
         let size = 0;
         stream
           .on('data', function(data) {
+            console.log(conn.config.host, 'stdout: ' + data);
             datas.push(data)
             size += data.length
           })
           .stderr.on('data', function(data) {
-            console.log('STDERR: ' + data);
+            console.log(conn.config.host, 'STDERR: ' + data);
           })
           .on('close', function() {
             let buf = Buffer.concat(datas, size)
-            console.log('Stream :: close\n');
+            console.log(conn.config.host, 'Stream :: close\n');
             resolve(buf.toString())
           });
       }
@@ -161,13 +143,13 @@ exports.exec = function(conn, shellUrl) {
   });
 }
 
-exports.init_sned = async function(ip, port, userName, password, sendAry) {
-  const conn = await this.init(ip, port, userName, password);
+exports.server_sned = async function(server, sendAry) {
+  const conn = await this.init(server);
   const ftp = await this.ftp(conn);
 
   let promises = sendAry.map((waitFtp) => this.sendOrigin(ftp, waitFtp[0], waitFtp[1]));
   let results = await Promise.all(promises);
-  return results;
+  return [server.host, conn, ftp, results];
 }
 
 exports.conn_sned = async function(conn, sendAry) {
