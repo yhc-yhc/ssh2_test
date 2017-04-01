@@ -21,30 +21,25 @@ module.exports = async function(servers, project_name, tar_name) {
 
 	let end = 0;
 	const end_up = [];
+	const conns = [];
 
 	async function upend([conn, runserver, fly_params, up_rs]) {
 		end++;
-		end_up.push([conn, runserver, fly_params, up_rs])
+		end_up.push(up_rs);
+		conns.push([conn, runserver, fly_params])
 		if (end == servers.length) {
 			console.log('====>   all server upload finished!!!');
-			const ups = end_up.map(([conn, runserver, fly_params, up_rs]) => up_rs.every(up => up))
+			const ups = end_up.map(up_rs => up_rs.every(up => up))
 			if (ups.every(up => up)) {
-				serverwork([conn, runserver, fly_params]);
+				serverwork(conns);
 			} else {
-				ups.forEach((up, index) => {
-					if (!up) {
-						console.log(`${end_up[index][0].config.host} upload error!`);
-						end_up.forEach(([conn, runserver, fly_params, up_rs]) => {
-							conn.end()
-						})
-					}
-				})
+				conns.map(conn => conn.end())
 			}
 		}
 	}
 
-	async function serverwork(end_up) {
-		end_up.forEach(async function([conn, runserver, fly_params]) {
+	async function serverwork(conns) {
+		conns.forEach(async function([conn, runserver, fly_params]) {
 			console.log(conn.config.host, 'exec shell ....')
 			const results_run = await ssh2.exec(conn, `chmod +x ${runserver}; ${runserver} ${tar_name} ${project_name} ${fly_params}`);
 			// console.log(results_run);
@@ -55,8 +50,8 @@ module.exports = async function(servers, project_name, tar_name) {
 	async function runEnd(conn) {
 		console.log(conn.config.host, 'has benn sync and runing ...');
 		conn.end()
-		end --;
-		if(!end) {
+		end--;
+		if (!end) {
 			console.log('all server synced and running ... ...');
 		}
 	}

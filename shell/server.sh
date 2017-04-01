@@ -25,7 +25,7 @@ if [ -s $tar_name ]; then
 
 	if [ $? -eq 0 ]; then
 		echo_success open $project_name success
-		rm ../$tar_name
+		rm ../${tar_name}_*.tar.bz2
 
 		cd $project_name
 
