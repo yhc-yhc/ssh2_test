@@ -25,16 +25,16 @@ if [ -s $tar_name ]; then
 
 	if [ $? -eq 0 ]; then
 		echo_success open $project_name success
-		rm ../${tar_name}_*.tar.bz2
+		rm ../${project_name}_*.tar.bz2
 
 		cd $project_name
 
-		echo init run params: $run_params
+		# echo init run params: $run_params
 		OLD_IFS="$IFS"
 		IFS="," 
 		fly_params=($run_params)
 		IFS="$OLD_IFS"
-		echo ./fly.sh will run with params: ${fly_params[@]}
+		# echo ./fly.sh will run with params: ${fly_params[@]}
 		./fly.sh ${fly_params[@]}
 		# >/dev/null 2>&1
 		if [ $? -eq 0 ]; then
