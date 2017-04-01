@@ -40,7 +40,7 @@ if [ -s $tar_name ]; then
 		if [ $? -eq 0 ]; then
 			echo_success server run $project_name success !
 		else
-			echo_error run ./fly.sh errror!
+			echo_error run ./fly.sh errror, please check!
 		fi
 	else
 		echo_error open $project_name error!

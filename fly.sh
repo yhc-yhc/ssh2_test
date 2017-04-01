@@ -1,0 +1,2 @@
+
+echo fly.sh params: $@
