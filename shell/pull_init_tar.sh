@@ -32,19 +32,23 @@ else
 		git submodule update --init --recursive > /dev/null 2>&1
 	fi
 fi
-echo_success $project_name download finished
+echo download or update result $?
 
-echo tar $project_name
-cd $project_box_path
-
-if [ -d $project_name ]; then
-	tar -jcpf $tar_name $project_name
-	if [ $? -eq 0 ]; then
-		echo_success tar $project_name success !
-		mv $tar_name $tar_path
+if [ $? -eq 0 ]; then
+	echo_success $project_name download finished
+	echo tar $project_name
+	cd $project_box_path
+	if [ -d $project_name ]; then
+		tar -jcpf $tar_name $project_name
+		if [ $? -eq 0 ]; then
+			echo_success tar $project_name success !
+			mv $tar_name $tar_path
+		else
+			echo_error tar $project_name failed
+		fi
 	else
-		echo_error tar $project_name failed
+		echo_error download $project_name failed!
 	fi
 else
-	echo_error download $project_name failed!
+	echo_error download or update error.
 fi
