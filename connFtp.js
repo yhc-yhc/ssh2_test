@@ -143,13 +143,14 @@ exports.exec = function(conn, shellUrl) {
   });
 }
 
-exports.server_sned = async function(server, sendAry) {
+exports.server_send = async function(server, sendAry) {
   const conn = await this.init(server);
   const ftp = await this.ftp(conn);
 
   let promises = sendAry.map((waitFtp) => this.sendOrigin(ftp, waitFtp[0], waitFtp[1]));
   let results = await Promise.all(promises);
-  return [server.host, conn, ftp, results];
+
+  return [conn, results];
 }
 
 exports.conn_sned = async function(conn, sendAry) {
