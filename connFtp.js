@@ -4,20 +4,25 @@ const fse = require('fs-extra');
 const moment = require('moment')
 const path = require('path');
 
-exports.pull_project = async function(git_url, project_box_path, tar_path) {
+exports.download_project = async function(git_url, project_box_path, tar_path) {
   console.log('tar file ...');
 
   const pathary = git_url.split('/')
   let project_name = pathary[pathary.length - 1].split('.')[0];
   let project_path = path.join(project_box_path, project_name)
   const [exs1, exs2] = await this.bathEnsureDir([project_box_path, tar_path])
-  let tar_name = `${project_name}_${moment().format("YYYYMMDD_HHmmss")}.tar.bz2`
     // console.log(exs1);
   if (exs1 && exs2) {
     return new Promise((resolve, reject) => {
-      const ls = cp.spawn('./shell/pull_init_tar.sh', [git_url, project_box_path, project_path, project_name, tar_path, tar_name])
+      const ls = cp.spawn('./shell/pull_init_tar.sh', [git_url, project_box_path, project_path, project_name, tar_path])
+
+      const datas = [];
+      let size = 0;
+
       ls.stdout.on('data', (data) => {
         console.log(`local stdout :: ${data}`);
+        datas.push(data)
+        size += data.length
       });
 
       ls.stderr.on('data', (data) => {
@@ -27,7 +32,10 @@ exports.pull_project = async function(git_url, project_box_path, tar_path) {
 
       ls.on('close', (code) => {
         // console.log(`child process exited with code ${code}`);
-        resolve([code, project_name, tar_name])
+        const buf = Buffer.concat(datas, size)
+        let str_ary = buf.toString().split('\n')
+        // console.log(str_ary[str_ary.length -2 ]);
+        resolve([code, project_name, str_ary[str_ary.length -2 ]])
       });
     });
   }

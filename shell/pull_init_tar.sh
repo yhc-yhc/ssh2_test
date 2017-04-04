@@ -4,7 +4,8 @@ project_box_path=$2
 project_path=$3
 project_name=$4
 tar_path=$5
-tar_name=$6
+branch_name=""
+tar_name=""
 
 echo_success(){
 	echo -e "\033[1;32m $* \033[0m"
@@ -16,39 +17,46 @@ echo_error(){
 
 cd $project_box_path
 if [ -d $project_path ]; then
-	echo $project_name exists, update ...
-	cd $project_path
-	git pull origin master > /dev/null 2>&1
-	if [ -s .gitmodules ]; then
-		echo git has submodels,init and update submodels ...
-		git submodule update --init --recursive > /dev/null 2>&1
-	fi
-else
-	echo $project_name not exists, clone from $git_url ...
-	git clone $1 > /dev/null 2>&1
-	cd $project_path
-	if [ -s .gitmodules ]; then
-		echo git has submodels, init and update submodels ...
-		git submodule update --init --recursive > /dev/null 2>&1
-	fi
+	rm -rf $project_name
 fi
-echo download or update result $?
+
+echo downloading the $project_name ...
+git clone $git_url > /dev/null 2>&1
 
 if [ $? -eq 0 ]; then
-	echo_success $project_name download/update finished ...
-	echo tar $project_name
+	echo_success $project_name download success .
+	
+	cd $project_path
+	branch_name=`git rev-parse --short HEAD`
+	tar_name="${project_name}_${branch_name}.tar.bz2"
+	if [ -s .gitmodules ]; then
+
+		echo git has submodels, init and update submodels ...
+		git submodule update --init --recursive > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			echo_success init submodels success .
+		else
+			echo_error init submodels error .
+		fi
+	fi
+
 	cd $project_box_path
 	if [ -d $project_name ]; then
 		tar -jcpf $tar_name $project_name
 		if [ $? -eq 0 ]; then
 			echo_success tar $project_name success ...
+			rm $tar_path/$project_name*
 			mv $tar_name $tar_path
+			echo $tar_name
 		else
 			echo_error tar $project_name failed !
+			exit 1
 		fi
 	else
-		echo_error download $project_name failed!
+		echo_error $project_name not exists!
+		exit 1
 	fi
 else
-	echo_error download or update error.
+	echo_error download $project_name error !
+	exit 1
 fi
