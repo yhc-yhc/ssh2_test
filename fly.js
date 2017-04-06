@@ -1,7 +1,18 @@
 const ssh2 = require('./connFtp.js')
 const path = require('path');
+const find_latest = require('./find_latest.js')
+const loadDir = require('./load_dir');
+const projects = loadDir('./conn');
 
-module.exports = async function(servers, project_name, tar_name) {
+async function fly(project) {
+
+	const servers = project.servers
+	let git_url = project.url;
+	const pathary = git_url.split('/')
+	let project_name = pathary[pathary.length - 1].split('.')[0];
+
+	let tar_name = await find_latest(project_name);
+	tar_name = path.basename(tar_name);
 
 	let tar_path = path.join(__dirname, './tar/');
 	let shelldir = path.join(__dirname, './shell');
@@ -56,3 +67,16 @@ module.exports = async function(servers, project_name, tar_name) {
 		}
 	}
 }
+
+if (process.argv[2]) {
+
+	let project_name = Object.keys(projects).filter(project => !project.indexOf(process.argv[2]))
+	console.log('fly:', project_name, projects[project_name]);
+	if (projects[project_name]) {
+		fly(projects[project_name])
+	}
+} else {
+	console.log('no project select ! plase give a project name to fly');
+}
+
+module.exports = fly;

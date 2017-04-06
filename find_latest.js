@@ -7,7 +7,7 @@ module.exports = function(project_name) {
 			if (err) {
 				reject(err)
 			} else {
-				resolve(rs)
+				resolve(rs.replace('\n', ''))
 			}
 		})
 	});

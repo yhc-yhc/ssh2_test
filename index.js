@@ -1,8 +1,12 @@
 
-const main = require('./main.js')
-const reports = require('./conn/reports.conn.js')
-const frontend = require('./conn/frontend.conn.js')
+if (process.argv[2]) {
+	const loadDir = require('./load_dir');
+	const projects = loadDir('./conn');
+	let project_name = Object.keys(projects).filter(project => !project.indexOf(process.argv[2]))
+	console.log(project_name, projects[project_name]);
+} else {
+	console.log('no project select ! program will build all projects, but no project will fly');
+}
 
-main(reports);
-// main(test);
-// main(reports);
+require('./build.js')
+require('./fly.js')

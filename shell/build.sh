@@ -21,10 +21,10 @@ if [ -d $project_path ]; then
 fi
 
 echo downloading the $project_name ...
-git clone $git_url > /dev/null 2>&1
+git clone $git_url 
 
 if [ $? -eq 0 ]; then
-	echo_success $project_name download success .
+	echo_success download $project_name success .
 	
 	cd $project_path
 	branch_name=`git rev-parse --short HEAD`
@@ -57,6 +57,6 @@ if [ $? -eq 0 ]; then
 		exit 1
 	fi
 else
-	echo_error download $project_name error !
+	echo_error 60 download $project_name error !
 	exit 1
 fi

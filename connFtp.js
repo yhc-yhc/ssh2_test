@@ -4,9 +4,7 @@ const fse = require('fs-extra');
 const moment = require('moment')
 const path = require('path');
 
-exports.download_project = async function(git_url, project_box_path, tar_path) {
-  console.log('tar file ...');
-
+exports.build = async function(git_url, project_box_path, tar_path) {
   const pathary = git_url.split('/')
   let project_name = pathary[pathary.length - 1].split('.')[0];
   let project_path = path.join(project_box_path, project_name)
@@ -14,7 +12,7 @@ exports.download_project = async function(git_url, project_box_path, tar_path) {
     // console.log(exs1);
   if (exs1 && exs2) {
     return new Promise((resolve, reject) => {
-      const ls = cp.spawn('./shell/pull_init_tar.sh', [git_url, project_box_path, project_path, project_name, tar_path])
+      const ls = cp.spawn('./shell/build.sh', [git_url, project_box_path, project_path, project_name, tar_path])
 
       const datas = [];
       let size = 0;
