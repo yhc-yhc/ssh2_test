@@ -6,7 +6,7 @@ const projects = loadDir('./conn');
 
 async function fly(project) {
 
-	const servers = project.servers
+	const servers = project.servers.filter(server => server.host)
 	let git_url = project.url;
 	const pathary = git_url.split('/')
 	let project_name = pathary[pathary.length - 1].split('.')[0];
