@@ -21,6 +21,7 @@ if [ -s $tar_name ]; then
 		cd work
 	fi
 
+	rm -rf $project_name
 	tar -jxpf ../$tar_name
 
 	if [ $? -eq 0 ]; then

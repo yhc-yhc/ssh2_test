@@ -4,6 +4,7 @@ project_box_path=$2
 project_path=$3
 project_name=$4
 tar_path=$5
+tar_param=$6
 branch_name=""
 tar_name=""
 
@@ -42,15 +43,38 @@ if [ $? -eq 0 ]; then
 
 	cd $project_box_path
 	if [ -d $project_name ]; then
-		tar -jcpf $tar_name $project_name
-		if [ $? -eq 0 ]; then
-			echo_success tar $project_name success ...
-			rm $tar_path/$project_name*
-			mv $tar_name $tar_path
-			echo $tar_name
+		if [ -z $tar_param ]; then
+			tar -jcpf $tar_name $project_name
+			if [ $? -eq 0 ]; then
+				echo_success tar $project_name success ...
+				rm $tar_path/$project_name*
+				mv $tar_name $tar_path
+				echo $tar_name
+				exit 0
+			else
+				echo_error tar $project_name failed !
+				exit 1
+			fi
 		else
-			echo_error tar $project_name failed !
-			exit 1
+			cd $project_name
+			if [ -d $tar_param ]; then
+				cp ./fly.sh $tar_param/
+				cp -r $tar_param $project_name
+				tar -jcpf $tar_name $project_name
+				if [ $? -eq 0 ]; then
+					echo_success tar $project_name success ...
+					rm $tar_path/$project_name*
+					mv $tar_name $tar_path
+					echo $tar_name
+					exit 0
+				else
+					echo_error tar $project_name failed !
+					exit 1
+				fi
+			else
+				echo_error the tar params exists, but $tar_param not exists in the $project_name
+				exit 1
+			fi
 		fi
 	else
 		echo_error $project_name not exists!
