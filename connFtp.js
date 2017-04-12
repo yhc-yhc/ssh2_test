@@ -12,7 +12,7 @@ exports.build = async function(git_url, project_box_path, tar_path, tar_param) {
     // console.log(exs1);
   if (exs1 && exs2) {
     return new Promise((resolve, reject) => {
-      const ls = cp.spawn('./shell/build.sh', [git_url, project_box_path, project_path, project_name, tar_path, tar_param])
+      const ls = cp.spawn('./shell/build.sh', [git_url, project_box_path, project_path, project_name, tar_path, tar_param || ""])
 
       const datas = [];
       let size = 0;
